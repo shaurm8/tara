@@ -1,5 +1,5 @@
 extends Node2D
-
+#бебеебеб
 const GRAVITY: float = 422.5
 
 var velocity: Vector2 = Vector2.ZERO
