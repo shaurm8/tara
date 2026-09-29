@@ -965,3 +965,4 @@ func _is_saw_hitting_enemy() -> bool:
 		if body != self and body.has_method("take_damage"):
 			return true
 	return false
+#hh
