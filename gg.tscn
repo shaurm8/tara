@@ -1,0 +1,267 @@
+[gd_scene format=3 uid="uid://cvyxxvjrgvfwd"]
+
+[ext_resource type="Script" uid="uid://qye5kvcylcmw" path="res://gg.gd" id="1_gj5va"]
+[ext_resource type="PackedScene" uid="uid://vshqm7sjyy4d" path="res://bullet_scene.tscn" id="2_hkydd"]
+[ext_resource type="PackedScene" uid="uid://byl3lf41j7el6" path="res://blood_drop.tscn" id="2_l0stk"]
+[ext_resource type="Texture2D" uid="uid://ckv8mfdw0rvet" path="res://for-gg/Group 55 2.png" id="4_5s8d6"]
+[ext_resource type="Texture2D" uid="uid://gf1moo63po5m" path="res://for-gg/Group 54 2.png" id="5_lmvx7"]
+[ext_resource type="Texture2D" uid="uid://divjdj8auflsr" path="res://Rectangle 3355.png" id="6_d5do3"]
+[ext_resource type="Texture2D" uid="uid://d3u67j6sxe1bl" path="res://for-gg/Group 56 2.png" id="6_ubqhc"]
+[ext_resource type="Texture2D" uid="uid://bcpjes3bthyb1" path="res://for-gg/Frame 8.png" id="7_hkydd"]
+[ext_resource type="Texture2D" uid="uid://bi4ew1c36flor" path="res://Group 103.png" id="7_tdxqo"]
+[ext_resource type="Texture2D" uid="uid://t5fnrivq210a" path="res://for-gg/Frame 12.png" id="8_5s8d6"]
+[ext_resource type="Texture2D" uid="uid://cujh6tgppc1g8" path="res://for-gg/Group 62.png" id="9_5s8d6"]
+[ext_resource type="Texture2D" uid="uid://btfhcha41pe6c" path="res://for-gg/Frame 11.png" id="9_lmvx7"]
+[ext_resource type="Texture2D" uid="uid://bn0ijp8gc03s0" path="res://for-gg/Vector.png" id="11_fgceq"]
+
+[sub_resource type="Animation" id="Animation_uqpq0"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TELO/LNOGA:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(-13, 7.0000005)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TELO/PNOGA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(13, 8)]
+}
+
+[sub_resource type="Animation" id="Animation_l0stk"]
+resource_name = "nogi"
+length = 1.2
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TELO/LNOGA:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3, 0.6, 0.9),
+"transitions": PackedFloat32Array(0.28717494, 0.28717494, 0.28717494, 0.28717494),
+"update": 0,
+"values": [Vector2(-13, 7.0000005), Vector2(-1, 2), Vector2(9, 7.0000005), Vector2(-4, 6)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TELO/PNOGA:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3, 0.6, 0.9),
+"transitions": PackedFloat32Array(0.28717494, 0.28717494, 0.28717494, 0.28717494),
+"update": 0,
+"values": [Vector2(13, 8), Vector2(-1, 8), Vector2(-10.000001, 8), Vector2(0.9999999, 5)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_hkydd"]
+_data = {
+&"RESET": SubResource("Animation_uqpq0"),
+&"nogi": SubResource("Animation_l0stk")
+}
+
+[sub_resource type="Gradient" id="Gradient_qq8r2"]
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_bcwju"]
+gradient = SubResource("Gradient_qq8r2")
+
+[sub_resource type="Curve" id="Curve_qq8r2"]
+_limits = [0.0, 1.0, 0.0, 6.0]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 1), -1.1170768, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_bcwju"]
+curve = SubResource("Curve_qq8r2")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_qq8r2"]
+particle_flag_disable_z = true
+emission_shape = 3
+emission_box_extents = Vector3(9, 1, 1)
+angle_min = -42.49999
+angle_max = 50.00001
+gravity = Vector3(-20, -23, 0)
+scale_curve = SubResource("CurveTexture_bcwju")
+color_ramp = SubResource("GradientTexture1D_bcwju")
+turbulence_enabled = true
+turbulence_noise_strength = 4.0
+turbulence_noise_speed = Vector3(16, 0, 0)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_87v8f"]
+particle_flag_disable_z = true
+angle_min = -97.899994
+angle_max = 11.0000105
+direction = Vector3(-1, 100, 0)
+spread = 180.0
+initial_velocity_min = 184.09
+initial_velocity_max = 395.84
+gravity = Vector3(0, 1000, 0)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_oay4l"]
+light_mode = 1
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_uqpq0"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_5s8d6")
+}],
+"loop": true,
+"name": &"ak_attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_5s8d6")
+}],
+"loop": true,
+"name": &"ak_normal",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_hkydd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_5s8d6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_lmvx7")
+}],
+"loop": true,
+"name": &"saw_attack",
+"speed": 120.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_hkydd")
+}],
+"loop": false,
+"name": &"saw_normal",
+"speed": 80.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("11_fgceq")
+}],
+"loop": true,
+"name": &"shotgun_attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("11_fgceq")
+}],
+"loop": true,
+"name": &"shotgun_normal",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_uqpq0"]
+radius = 1.486824
+height = 4.788269
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_w3qgw"]
+size = Vector2(10.535889, 18.920685)
+
+[node name="gg" type="CharacterBody2D" unique_id=690415176 groups=["player"]]
+position = Vector2(640, 360)
+collision_mask = 9
+script = ExtResource("1_gj5va")
+bullet_scene = ExtResource("2_hkydd")
+blood_drop_scene = ExtResource("2_l0stk")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1467579701]
+libraries/ = SubResource("AnimationLibrary_hkydd")
+
+[node name="WalkParticles" type="GPUParticles2D" parent="." unique_id=2098944091]
+position = Vector2(0.54919434, 1.6262522)
+scale = Vector2(1.3, 1.3)
+emitting = false
+amount = 15
+process_material = SubResource("ParticleProcessMaterial_qq8r2")
+
+[node name="DeathBleedParticles" type="GPUParticles2D" parent="." unique_id=22757299]
+position = Vector2(0.08843994, 0.21136475)
+emitting = false
+amount = 4
+process_material = SubResource("ParticleProcessMaterial_87v8f")
+
+[node name="cas" type="CanvasLayer" parent="." unique_id=1427882384]
+scale = Vector2(1.7, 1.7)
+transform = Transform2D(1.7, 0, 0, 1.7, 0, 0)
+
+[node name="Node2D" type="Node2D" parent="cas" unique_id=1281765741]
+light_mask = 0
+position = Vector2(573.05896, 312.35284)
+scale = Vector2(0.7, 0.7)
+
+[node name="recc" type="Sprite2D" parent="cas/Node2D" unique_id=1442180690]
+material = SubResource("CanvasItemMaterial_oay4l")
+position = Vector2(2.3841855e-07, 398.333)
+texture = ExtResource("6_d5do3")
+
+[node name="nadpis" type="Sprite2D" parent="cas/Node2D/recc" unique_id=61138551]
+material = SubResource("CanvasItemMaterial_oay4l")
+texture = ExtResource("7_tdxqo")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=162209706]
+position = Vector2(0.2508545, -0.19476318)
+zoom = Vector2(3, 3)
+
+[node name="TELO" type="Node2D" parent="." unique_id=1068861480]
+
+[node name="LNOGA" type="Sprite2D" parent="TELO" unique_id=838275327]
+position = Vector2(-13, 7.0000005)
+texture = ExtResource("4_5s8d6")
+
+[node name="PNOGA" type="Sprite2D" parent="TELO" unique_id=483813923]
+position = Vector2(13, 8)
+texture = ExtResource("5_lmvx7")
+
+[node name="TUL" type="Sprite2D" parent="TELO" unique_id=1067135302]
+position = Vector2(-1.2274389, -0.98241615)
+texture = ExtResource("6_ubqhc")
+
+[node name="RUKI" type="AnimatedSprite2D" parent="TELO" unique_id=125418692]
+position = Vector2(5.251403, 5.029419)
+sprite_frames = SubResource("SpriteFrames_uqpq0")
+animation = &"saw_attack"
+
+[node name="BloodMarker" type="Marker2D" parent="TELO/RUKI" unique_id=1100638751]
+position = Vector2(12.748596, 4.970581)
+
+[node name="Hitbox" type="Area2D" parent="TELO/RUKI" unique_id=1854144830 groups=["player"]]
+z_index = 21
+y_sort_enabled = true
+position = Vector2(-7.0441895, 7.0440674)
+scale = Vector2(3.5220132, 3.5220127)
+collision_layer = 2
+collision_mask = 2
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TELO/RUKI/Hitbox" unique_id=539855438]
+position = Vector2(5.5387244, -1.0838947)
+rotation = 1.5707964
+shape = SubResource("CapsuleShape2D_uqpq0")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=294617524]
+position = Vector2(1.7487183, 1.907898)
+shape = SubResource("RectangleShape2D_w3qgw")

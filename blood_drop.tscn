@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://byl3lf41j7el6"]
+
+[ext_resource type="Script" uid="uid://c2767r5t8leeq" path="res://BloodDrop.gd" id="1_5fd2k"]
+
+[node name="BloodDrop" type="Node2D" unique_id=138501518]
+z_index = -1
+script = ExtResource("1_5fd2k")

@@ -1,0 +1,28 @@
+[gd_scene format=3 uid="uid://vshqm7sjyy4d"]
+
+[ext_resource type="Script" uid="uid://dpc1f4ah68h7h" path="res://bullet_scene.gd" id="1_aic6c"]
+[ext_resource type="Texture2D" uid="uid://b4a8kio7fp2cc" path="res://for-gg/Group 70.png" id="2_bx881"]
+[ext_resource type="PackedScene" uid="uid://byl3lf41j7el6" path="res://blood_drop.tscn" id="2_lg3i7"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_bx881"]
+blend_mode = 1
+light_mode = 2
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_g1wob"]
+size = Vector2(21.21836, 1)
+
+[node name="bullet_scene" type="Area2D" unique_id=1106217904]
+material = SubResource("CanvasItemMaterial_bx881")
+collision_layer = 2
+collision_mask = 2
+script = ExtResource("1_aic6c")
+enable_trail = false
+blood_drop_scene = ExtResource("2_lg3i7")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=474369230]
+position = Vector2(-5, 0)
+texture = ExtResource("2_bx881")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1444907953]
+position = Vector2(-1.9366527, 0.00088214874)
+shape = SubResource("RectangleShape2D_g1wob")
