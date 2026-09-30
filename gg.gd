@@ -56,32 +56,25 @@ const SAW_PUSH_SHAKE_DURATION: float = 0.08
 
 const CROUCH_OFFSET: float = 4.2
 const CROUCH_SPEED: float = 12.0
-const LEG_SWAY_AMOUNT: float = deg_to_rad(6.0)
-const LEG_SWAY_SPEED: float = 12.0
-const LEG_RETURN_SPEED: float = 10.0
 
 enum WeaponType { SAW, SHOTGUN, AK }
 enum HandJumpState { NORMAL, JUMPING, FALLING, LANDING }
 
 # === EXPORT ПЕРЕМЕННЫЕ ===
 @export var bullet_scene: PackedScene
-@export var dead_texture: Texture2D
 @export var death_blood_scene: PackedScene
 @export var blood_drop_scene: PackedScene
 @export var restart_prompt: Node2D
 
 # === КЭШ НОД ===
 @onready var telo: Node2D = get_node_or_null("TELO")
-@onready var tul: Node2D = get_node_or_null("TELO/TUL")
+@onready var tul: AnimatedSprite2D = get_node_or_null("TELO/TUL") # теперь AnimatedSprite2D: idle / walk / dead
 @onready var ruki: Node2D = get_node_or_null("TELO/RUKI")
-@onready var lnoga: Node2D = get_node_or_null("TELO/LNOGA")
-@onready var pnoga: Node2D = get_node_or_null("TELO/PNOGA")
 @onready var camera: Camera2D = get_node_or_null("Camera2D")
-@onready var anim_player: AnimationPlayer = get_node_or_null("AnimationPlayer")
 @onready var collision_shape: CollisionShape2D = get_node_or_null("CollisionShape2D")
 @onready var walk_particles: GPUParticles2D = get_node_or_null("WalkParticles")
 @onready var chainsaw_hitbox: Area2D = get_node_or_null("TELO/RUKI/Hitbox")
-@onready var blood_marker: Marker2D = get_node_or_null("TELO/RUKI/BloodMarker") # <--- Наш маркер спавна крови!
+@onready var blood_marker: Marker2D = get_node_or_null("TELO/RUKI/BloodMarker")
 
 # === СОСТОЯНИЕ ===
 var current_weapon: WeaponType = WeaponType.SAW
@@ -122,7 +115,6 @@ var shake_intensity: float = 0.0
 var shake_duration: float = 0.0
 var chainsaw_shake_time: float = 0.0
 var crouch_current: float = 0.0
-var leg_sway_time: float = 0.0
 var death_rotation_speed: float = 0.0
 var death_bounces: int = 0
 
@@ -130,14 +122,10 @@ var tul_base_x: float = 0.0
 var tul_base_y: float = 0.0
 var tulo_original_scale: Vector2 = Vector2.ONE
 var tulo_land_scale_multiplier: Vector2 = Vector2.ONE
-var normal_texture: Texture2D
 var hands_original_position: Vector2 = Vector2.ZERO
 var hands_original_rotation: float = 0.0
 var camera_original_pos: Vector2 = Vector2.ZERO
 var start_position: Vector2 = Vector2.ZERO
-var leg_original_rotation_l: float = 0.0
-var leg_original_rotation_r: float = 0.0
-var leg_original_position_r: Vector2 = Vector2.ZERO
 var restart_prompt_target_pos: Vector2 = Vector2.ZERO
 
 var tulo_attack_tween: Tween
@@ -164,24 +152,16 @@ func _setup_fade_in() -> void:
 
 func _cache_initial_transforms() -> void:
 	start_position = global_position
-	if anim_player:
-		anim_player.speed_scale = 4.0
 	if tul:
 		tul_base_x = tul.position.x
 		tul_base_y = tul.position.y
 		tulo_original_scale = tul.scale
-		if tul is Sprite2D:
-			normal_texture = tul.texture
+		tul.play("idle")
 	if ruki:
 		hands_original_position = ruki.position
 		hands_original_rotation = ruki.rotation
 	if camera:
 		camera_original_pos = camera.position
-	if lnoga:
-		leg_original_rotation_l = lnoga.rotation
-	if pnoga:
-		leg_original_rotation_r = pnoga.rotation
-		leg_original_position_r = pnoga.position
 	if walk_particles:
 		walk_particles.emitting = false
 	if restart_prompt:
@@ -412,8 +392,11 @@ func _update_visuals_and_animations(delta: float) -> void:
 	if telo: telo.scale.x = facing
 	if collision_shape: collision_shape.scale.x = facing
 
-	if anim_player:
-		anim_player.play("nogi" if (dir != 0 and is_on_floor()) else "RESET")
+	# Анимация тела (ноги внутри кадров): idle / walk
+	if tul:
+		var body_anim = "walk" if (dir != 0 and is_on_floor()) else "idle"
+		if tul.animation != body_anim:
+			tul.play(body_anim)
 
 	var should_crouch = is_on_floor() and dir == 0 and Input.is_action_pressed("s")
 	crouch_current = lerp(crouch_current, 1.0 if should_crouch else 0.0, delta * CROUCH_SPEED)
@@ -425,7 +408,6 @@ func _update_visuals_and_animations(delta: float) -> void:
 		tul.scale = base_tulo_scale * tulo_land_scale_multiplier
 
 	_update_hands_position(delta, is_aiming_or_attacking)
-	_update_leg_sway(delta, dir)
 
 	var should_walk_particles = is_on_floor() and abs(velocity.x) > 1.0
 	if should_walk_particles != walk_particles_enabled:
@@ -453,18 +435,6 @@ func _update_hands_position(delta: float, is_aiming_or_attacking: bool) -> void:
 
 	if is_attacking and not attack_manual_pose and ruki:
 		ruki.rotation = attack_hand_angle_locked + shake_rot_val * 0.5
-
-func _update_leg_sway(delta: float, dir: float) -> void:
-	if not (lnoga and pnoga):
-		return
-	if is_on_floor() and dir != 0:
-		leg_sway_time += delta * LEG_SWAY_SPEED
-		var sway = sin(leg_sway_time) * LEG_SWAY_AMOUNT
-		lnoga.rotation = leg_original_rotation_l + sway
-		pnoga.rotation = leg_original_rotation_r - sway
-	else:
-		lnoga.rotation = lerp_angle(lnoga.rotation, leg_original_rotation_l, delta * LEG_RETURN_SPEED)
-		pnoga.rotation = lerp_angle(pnoga.rotation, leg_original_rotation_r, delta * LEG_RETURN_SPEED)
 
 func shoot_ak() -> void:
 	_fire_weapon(AK_FIRE_RATE, AK_SPREAD_ANGLE, 1, 8.0, 1350.0, 300.0, 2.2, 0.03, 0.06, 0.4, 0.08)
@@ -824,19 +794,17 @@ func die(from_position: Vector2 = global_position) -> void:
 		tul.position.x = tul_base_x
 		tul.position.y = tul_base_y
 		tul.rotation = 0.0
-		if dead_texture and tul is Sprite2D:
-			tul.texture = dead_texture
+		# Анимация "dead" (один кадр) в SpriteFrames
+		if tul.sprite_frames and tul.sprite_frames.has_animation("dead"):
+			tul.play("dead")
+		else:
+			tul.stop()
 
 	_kill_tween(hands_tween)
 	_kill_tween(tulo_attack_tween)
 	_kill_tween(tulo_land_tween)
 
 	reset_hands_position()
-	if lnoga: lnoga.rotation = leg_original_rotation_l
-	if pnoga:
-		pnoga.rotation = leg_original_rotation_r
-		pnoga.position = leg_original_position_r
-	if anim_player: anim_player.play("RESET")
 
 	var away_dir = (global_position - from_position).normalized()
 	if abs(away_dir.x) < 0.2: away_dir.x = -facing
@@ -918,8 +886,8 @@ func respawn() -> void:
 	collision_layer = 1
 	collision_mask = 1
 
-	if normal_texture and tul is Sprite2D:
-		tul.texture = normal_texture
+	if tul:
+		tul.play("idle")
 
 	global_position = start_position
 	velocity = Vector2.ZERO
@@ -965,4 +933,3 @@ func _is_saw_hitting_enemy() -> bool:
 		if body != self and body.has_method("take_damage"):
 			return true
 	return false
-#hh

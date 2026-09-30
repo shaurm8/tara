@@ -3,78 +3,15 @@
 [ext_resource type="Script" uid="uid://qye5kvcylcmw" path="res://gg.gd" id="1_gj5va"]
 [ext_resource type="PackedScene" uid="uid://vshqm7sjyy4d" path="res://bullet_scene.tscn" id="2_hkydd"]
 [ext_resource type="PackedScene" uid="uid://byl3lf41j7el6" path="res://blood_drop.tscn" id="2_l0stk"]
-[ext_resource type="Texture2D" uid="uid://ckv8mfdw0rvet" path="res://for-gg/Group 55 2.png" id="4_5s8d6"]
-[ext_resource type="Texture2D" uid="uid://gf1moo63po5m" path="res://for-gg/Group 54 2.png" id="5_lmvx7"]
 [ext_resource type="Texture2D" uid="uid://divjdj8auflsr" path="res://Rectangle 3355.png" id="6_d5do3"]
-[ext_resource type="Texture2D" uid="uid://d3u67j6sxe1bl" path="res://for-gg/Group 56 2.png" id="6_ubqhc"]
-[ext_resource type="Texture2D" uid="uid://bcpjes3bthyb1" path="res://for-gg/Frame 8.png" id="7_hkydd"]
 [ext_resource type="Texture2D" uid="uid://bi4ew1c36flor" path="res://Group 103.png" id="7_tdxqo"]
 [ext_resource type="Texture2D" uid="uid://t5fnrivq210a" path="res://for-gg/Frame 12.png" id="8_5s8d6"]
+[ext_resource type="Texture2D" uid="uid://cag4p8r3c1box" path="res://for-gg/Frame 10.png" id="8_hkydd"]
+[ext_resource type="Texture2D" uid="uid://p4sv722evc0k" path="res://for-gg/Frame 7.png" id="8_lmvx7"]
 [ext_resource type="Texture2D" uid="uid://cujh6tgppc1g8" path="res://for-gg/Group 62.png" id="9_5s8d6"]
 [ext_resource type="Texture2D" uid="uid://btfhcha41pe6c" path="res://for-gg/Frame 11.png" id="9_lmvx7"]
+[ext_resource type="Texture2D" uid="uid://duja7ioc5lm3d" path="res://for-gg/Frame 13.png" id="11_5s8d6"]
 [ext_resource type="Texture2D" uid="uid://bn0ijp8gc03s0" path="res://for-gg/Vector.png" id="11_fgceq"]
-
-[sub_resource type="Animation" id="Animation_uqpq0"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("TELO/LNOGA:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(-13, 7.0000005)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("TELO/PNOGA:position")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(13, 8)]
-}
-
-[sub_resource type="Animation" id="Animation_l0stk"]
-resource_name = "nogi"
-length = 1.2
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("TELO/LNOGA:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.6, 0.9),
-"transitions": PackedFloat32Array(0.28717494, 0.28717494, 0.28717494, 0.28717494),
-"update": 0,
-"values": [Vector2(-13, 7.0000005), Vector2(-1, 2), Vector2(9, 7.0000005), Vector2(-4, 6)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("TELO/PNOGA:position")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.3, 0.6, 0.9),
-"transitions": PackedFloat32Array(0.28717494, 0.28717494, 0.28717494, 0.28717494),
-"update": 0,
-"values": [Vector2(13, 8), Vector2(-1, 8), Vector2(-10.000001, 8), Vector2(0.9999999, 5)]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_hkydd"]
-_data = {
-&"RESET": SubResource("Animation_uqpq0"),
-&"nogi": SubResource("Animation_l0stk")
-}
 
 [sub_resource type="Gradient" id="Gradient_qq8r2"]
 colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 0)
@@ -116,6 +53,25 @@ gravity = Vector3(0, 1000, 0)
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_oay4l"]
 light_mode = 1
 
+[sub_resource type="SpriteFrames" id="SpriteFrames_hkydd"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8_lmvx7")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8_lmvx7")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 14.0
+}]
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_uqpq0"]
 animations = [{
 "frames": [{
@@ -136,13 +92,16 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("7_hkydd")
+"texture": ExtResource("8_hkydd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_lmvx7")
 }, {
 "duration": 1.0,
 "texture": ExtResource("8_5s8d6")
 }, {
 "duration": 1.0,
-"texture": ExtResource("9_lmvx7")
+"texture": ExtResource("11_5s8d6")
 }],
 "loop": true,
 "name": &"saw_attack",
@@ -150,7 +109,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("7_hkydd")
+"texture": ExtResource("8_hkydd")
 }],
 "loop": false,
 "name": &"saw_normal",
@@ -178,7 +137,7 @@ radius = 1.486824
 height = 4.788269
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_w3qgw"]
-size = Vector2(10.535889, 18.920685)
+size = Vector2(11.870605, 29.867577)
 
 [node name="gg" type="CharacterBody2D" unique_id=690415176 groups=["player"]]
 position = Vector2(640, 360)
@@ -186,9 +145,6 @@ collision_mask = 9
 script = ExtResource("1_gj5va")
 bullet_scene = ExtResource("2_hkydd")
 blood_drop_scene = ExtResource("2_l0stk")
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1467579701]
-libraries/ = SubResource("AnimationLibrary_hkydd")
 
 [node name="WalkParticles" type="GPUParticles2D" parent="." unique_id=2098944091]
 position = Vector2(0.54919434, 1.6262522)
@@ -227,22 +183,15 @@ zoom = Vector2(3, 3)
 
 [node name="TELO" type="Node2D" parent="." unique_id=1068861480]
 
-[node name="LNOGA" type="Sprite2D" parent="TELO" unique_id=838275327]
-position = Vector2(-13, 7.0000005)
-texture = ExtResource("4_5s8d6")
-
-[node name="PNOGA" type="Sprite2D" parent="TELO" unique_id=483813923]
-position = Vector2(13, 8)
-texture = ExtResource("5_lmvx7")
-
-[node name="TUL" type="Sprite2D" parent="TELO" unique_id=1067135302]
-position = Vector2(-1.2274389, -0.98241615)
-texture = ExtResource("6_ubqhc")
+[node name="TUL" type="AnimatedSprite2D" parent="TELO" unique_id=1482508438]
+position = Vector2(-1.0930395, 0.53561974)
+sprite_frames = SubResource("SpriteFrames_hkydd")
+animation = &"walk"
 
 [node name="RUKI" type="AnimatedSprite2D" parent="TELO" unique_id=125418692]
-position = Vector2(5.251403, 5.029419)
+position = Vector2(3.4353628, -0.99612427)
 sprite_frames = SubResource("SpriteFrames_uqpq0")
-animation = &"saw_attack"
+animation = &"saw_normal"
 
 [node name="BloodMarker" type="Marker2D" parent="TELO/RUKI" unique_id=1100638751]
 position = Vector2(12.748596, 4.970581)
@@ -258,10 +207,10 @@ monitoring = false
 monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TELO/RUKI/Hitbox" unique_id=539855438]
-position = Vector2(5.5387244, -1.0838947)
+position = Vector2(5.8970666, -1.35175)
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_uqpq0")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=294617524]
-position = Vector2(1.7487183, 1.907898)
+position = Vector2(-1.0100708, 2.0967407)
 shape = SubResource("RectangleShape2D_w3qgw")
