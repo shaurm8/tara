@@ -53,15 +53,22 @@ const SAW_PUSH_BLOOD_DROPS_MIN: int = 35
 const SAW_PUSH_BLOOD_DROPS_MAX: int = 40
 const SAW_PUSH_SHAKE_INTENSITY: float = 0.5
 const SAW_PUSH_SHAKE_DURATION: float = 0.08
+const SAW_PUSH_STUCK_TURN_SPEED: float = deg_to_rad(20.0)   # скорость поворота пилы во враге (град/сек)
+const SAW_PUSH_FREE_TURN_SPEED: float = deg_to_rad(1000.0)  # свободный поворот (почти мгновенный)
+
+# --- Огнемет ---
+const FLAME_FIRE_RATE: float = 0.05
+const FLAME_SPREAD_ANGLE: float = deg_to_rad(16.0)
 
 const CROUCH_OFFSET: float = 4.2
 const CROUCH_SPEED: float = 12.0
 
-enum WeaponType { SAW, SHOTGUN, AK }
+enum WeaponType { SAW, SHOTGUN, AK, FLAMETHROWER }
 enum HandJumpState { NORMAL, JUMPING, FALLING, LANDING }
 
 # === EXPORT ПЕРЕМЕННЫЕ ===
 @export var bullet_scene: PackedScene
+@export var flame_bullet_scene: PackedScene
 @export var death_blood_scene: PackedScene
 @export var blood_drop_scene: PackedScene
 @export var restart_prompt: Node2D
@@ -101,6 +108,7 @@ var attack_manual_pose: bool = false
 
 var is_saw_pushing: bool = false
 var saw_push_damage_timer: float = 0.0
+var saw_push_aim_angle: float = 0.0
 
 var knockback: Vector2 = Vector2.ZERO
 var facing: float = 1.0
@@ -121,7 +129,6 @@ var death_bounces: int = 0
 var tul_base_x: float = 0.0
 var tul_base_y: float = 0.0
 var tulo_original_scale: Vector2 = Vector2.ONE
-var tulo_land_scale_multiplier: Vector2 = Vector2.ONE
 var hands_original_position: Vector2 = Vector2.ZERO
 var hands_original_rotation: float = 0.0
 var camera_original_pos: Vector2 = Vector2.ZERO
@@ -129,7 +136,6 @@ var start_position: Vector2 = Vector2.ZERO
 var restart_prompt_target_pos: Vector2 = Vector2.ZERO
 
 var tulo_attack_tween: Tween
-var tulo_land_tween: Tween
 var hands_tween: Tween
 var restart_prompt_tween: Tween
 
@@ -207,7 +213,7 @@ func _is_saw_push_pressed() -> bool:
 func switch_weapon() -> void:
 	if is_attacking or is_reloading or is_saw_pushing:
 		return
-	current_weapon = ((current_weapon + 1) % 3) as WeaponType
+	current_weapon = ((current_weapon + 1) % 4) as WeaponType
 
 func get_aim_angle_local() -> float:
 	if not telo:
@@ -281,6 +287,9 @@ func _handle_weapon_inputs(delta: float) -> void:
 		if current_weapon == WeaponType.AK:
 			if _is_attack_pressed() and shoot_cooldown <= 0.0:
 				shoot_ak()
+		elif current_weapon == WeaponType.FLAMETHROWER:
+			if _is_attack_pressed() and shoot_cooldown <= 0.0:
+				shoot_flamethrower()
 		elif _is_attack_just_pressed() and shoot_cooldown <= 0.0 and attack_cooldown_timer <= 0.0:
 			shoot_shotgun()
 
@@ -289,19 +298,7 @@ func _handle_movement_and_gravity(delta: float) -> void:
 	if Input.is_action_just_pressed("w"):
 		jump_buffer_timer = JUMP_BUFFER_TIME
 
-	var was_on_floor = was_on_floor_prev
 	was_on_floor_prev = is_on_floor()
-
-	if not is_on_floor():
-		if was_on_floor:
-			hands_jump_up()
-		if velocity.y > 0 and hand_jump_state != HandJumpState.FALLING:
-			hands_fall_down()
-		elif velocity.y < 0 and hand_jump_state != HandJumpState.JUMPING:
-			hands_jump_up()
-	elif not was_on_floor:
-		hands_land()
-		tulo_land()
 
 	if is_on_floor():
 		coyote_timer = COYOTE_TIME
@@ -379,7 +376,7 @@ func _update_visuals_and_animations(delta: float) -> void:
 	var is_aiming_or_attacking = is_attacking or is_saw_pushing or _is_attack_pressed() or attack_cooldown_timer > 0.0
 
 	if ruki is AnimatedSprite2D:
-		var prefix = ["saw_", "shotgun_", "ak_"][current_weapon]
+		var prefix = ["saw_", "shotgun_", "ak_", "flame_"][current_weapon]
 		var target_anim = prefix + ("attack" if is_aiming_or_attacking else "normal")
 		if ruki.animation != target_anim:
 			ruki.play(target_anim)
@@ -404,8 +401,7 @@ func _update_visuals_and_animations(delta: float) -> void:
 	if tul:
 		var breath = sin(Time.get_ticks_msec() * 0.003) * 0.15
 		tul.position.y = tul_base_y + breath + crouch_current * CROUCH_OFFSET
-		var base_tulo_scale = tulo_original_scale if is_on_floor() else Vector2(tulo_original_scale.x * 0.9, tulo_original_scale.y * 1.1)
-		tul.scale = base_tulo_scale * tulo_land_scale_multiplier
+		tul.scale = tulo_original_scale
 
 	_update_hands_position(delta, is_aiming_or_attacking)
 
@@ -437,7 +433,11 @@ func _update_hands_position(delta: float, is_aiming_or_attacking: bool) -> void:
 		ruki.rotation = attack_hand_angle_locked + shake_rot_val * 0.5
 
 func shoot_ak() -> void:
-	_fire_weapon(AK_FIRE_RATE, AK_SPREAD_ANGLE, 1, 8.0, 1350.0, 300.0, 2.2, 0.03, 0.06, 0.4, 0.08)
+	_fire_weapon(AK_FIRE_RATE, AK_SPREAD_ANGLE, 1, 8.0, 1350.0, 300.0, 2.2, 0.03, 0.06, 0.4, 0.08, bullet_scene)
+
+func shoot_flamethrower() -> void:
+	# Вылетает быстро (580.0), по 1 частице за выстрел, частота 0.05 сек
+	_fire_weapon(FLAME_FIRE_RATE, FLAME_SPREAD_ANGLE, 1, 2.5, 580.0, 300.0, 0.8, 0.02, 0.04, 0.15, 0.05, flame_bullet_scene)
 
 func shoot_shotgun() -> void:
 	if is_reloading:
@@ -446,9 +446,9 @@ func shoot_shotgun() -> void:
 		reload_shotgun()
 		return
 	shotgun_ammo -= 1
-	_fire_weapon(SHOTGUN_FIRE_RATE, SPREAD_ANGLE, PELLET_COUNT, 12.0, 1232.4, 264.1, 4.93, 0.04, 0.18, 1.2, 0.18)
+	_fire_weapon(SHOTGUN_FIRE_RATE, SPREAD_ANGLE, PELLET_COUNT, 12.0, 1232.4, 264.1, 4.93, 0.04, 0.18, 1.2, 0.18, bullet_scene)
 
-func _fire_weapon(rate: float, spread: float, pellets: int, damage: float, bullet_speed: float, ray_len: float, recoil_dist: float, out_t: float, back_t: float, shake_i: float, shake_d: float) -> void:
+func _fire_weapon(rate: float, spread: float, pellets: int, damage: float, bullet_speed: float, ray_len: float, recoil_dist: float, out_t: float, back_t: float, shake_i: float, shake_d: float, scene: PackedScene) -> void:
 	shoot_cooldown = rate
 	start_shake(shake_i, shake_d)
 
@@ -471,8 +471,8 @@ func _fire_weapon(rate: float, spread: float, pellets: int, damage: float, bulle
 		var actual_speed = bullet_speed * randf_range(0.88, 1.12)
 		var spawn_pos = muzzle_pos + pellet_dir * depth_offset
 
-		if bullet_scene:
-			var bullet = bullet_scene.instantiate()
+		if scene:
+			var bullet = scene.instantiate()
 			get_tree().current_scene.add_child(bullet)
 			bullet.global_position = spawn_pos
 			if "velocity" in bullet: bullet.velocity = pellet_dir * actual_speed
@@ -539,10 +539,7 @@ func perform_chainsaw_attack_visual() -> void:
 	attack_manual_pose = false
 	is_attacking = false
 
-	if is_on_floor():
-		reset_hands_position()
-	else:
-		hand_jump_state = HandJumpState.FALLING if velocity.y > 0 else HandJumpState.JUMPING
+	reset_hands_position()
 
 func _perform_slash_attack(base_angle: float, is_downward: bool) -> void:
 	attack_cooldown_timer = SLASH_DURATION + SLASH_WINDUP_TIME + SLASH_COOLDOWN_PADDING
@@ -643,18 +640,28 @@ func _handle_saw_push(delta: float) -> void:
 		is_saw_pushing = true
 		attack_manual_pose = true
 		saw_push_damage_timer = 0.0
+		saw_push_aim_angle = get_aim_angle_local()
 		if chainsaw_hitbox:
 			chainsaw_hitbox.monitoring = true
 			chainsaw_hitbox.monitorable = true
 
-	var mouse_pos = get_global_mouse_position()
-	var dir_x = sign(mouse_pos.x - global_position.x)
-	if dir_x != 0:
-		facing = dir_x
-		if telo: telo.scale.x = facing
-		if collision_shape: collision_shape.scale.x = facing
+	var stuck_in_enemy = _is_saw_hitting_enemy()
 
-	var aim_angle = get_aim_angle_local()
+	# Разворот персонажа: во время пиления врага заблокирован
+	if not stuck_in_enemy:
+		var mouse_pos = get_global_mouse_position()
+		var dir_x = sign(mouse_pos.x - global_position.x)
+		if dir_x != 0:
+			facing = dir_x
+			if telo: telo.scale.x = facing
+			if collision_shape: collision_shape.scale.x = facing
+
+	# Поворот пилы: во враге очень медленный
+	var target_aim = get_aim_angle_local()
+	var turn_speed = SAW_PUSH_STUCK_TURN_SPEED if stuck_in_enemy else SAW_PUSH_FREE_TURN_SPEED
+	saw_push_aim_angle = move_toward(saw_push_aim_angle, target_aim, turn_speed * delta)
+
+	var aim_angle = saw_push_aim_angle
 	attack_hand_angle_locked = aim_angle
 
 	chainsaw_shake_time += delta * 25.0
@@ -677,10 +684,7 @@ func _stop_saw_push() -> void:
 	attack_manual_pose = false
 	if chainsaw_hitbox:
 		chainsaw_hitbox.monitoring = false
-	if is_on_floor():
-		reset_hands_position()
-	else:
-		hand_jump_state = HandJumpState.FALLING if velocity.y > 0 else HandJumpState.JUMPING
+	reset_hands_position()
 
 func _apply_saw_push_damage() -> void:
 	if not chainsaw_hitbox:
@@ -712,32 +716,6 @@ func _spawn_saw_push_blood(spawn_pos: Vector2, cut_angle: float) -> void:
 		var speed = randf_range(120.0, 420.0)
 		drop.velocity = Vector2(cos(final_angle), sin(final_angle)) * speed
 
-func _set_hand_air_state(state: HandJumpState, offset: Vector2, rot_deg: float, trans_type: int, ease_type: int) -> void:
-	if hand_jump_state == state or is_attacking or is_saw_pushing or not ruki:
-		return
-	hand_jump_state = state
-	_kill_tween(hands_tween)
-	hands_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_STOP).set_trans(trans_type).set_ease(ease_type)
-	hands_tween.tween_property(ruki, "position", hands_original_position + offset, 0.2)
-	hands_tween.parallel().tween_property(ruki, "rotation", deg_to_rad(rot_deg), 0.2)
-
-func hands_jump_up() -> void:
-	_set_hand_air_state(HandJumpState.JUMPING, Vector2(0, -7.0), -25.0, Tween.TRANS_QUINT, Tween.EASE_OUT)
-
-func hands_fall_down() -> void:
-	_set_hand_air_state(HandJumpState.FALLING, Vector2(0, 0.7), 10.0, Tween.TRANS_QUINT, Tween.EASE_IN)
-
-func hands_land() -> void:
-	if hand_jump_state == HandJumpState.NORMAL or is_attacking or is_saw_pushing or not ruki:
-		return
-	hand_jump_state = HandJumpState.LANDING
-	_kill_tween(hands_tween)
-	hands_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_STOP).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
-	hands_tween.tween_property(ruki, "position", hands_original_position, 0.15)
-	hands_tween.parallel().tween_property(ruki, "rotation", hands_original_rotation, 0.15)
-	await get_tree().create_timer(0.2).timeout
-	hand_jump_state = HandJumpState.NORMAL
-
 func reset_hands_position() -> void:
 	if not ruki: return
 	_kill_tween(hands_tween)
@@ -745,12 +723,6 @@ func reset_hands_position() -> void:
 	hands_tween.tween_property(ruki, "position", hands_original_position, 0.1)
 	hands_tween.parallel().tween_property(ruki, "rotation", hands_original_rotation, 0.1)
 	hand_jump_state = HandJumpState.NORMAL
-
-func tulo_land() -> void:
-	_kill_tween(tulo_land_tween)
-	tulo_land_tween = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_STOP).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
-	tulo_land_tween.tween_property(self, "tulo_land_scale_multiplier", Vector2(1.1, 0.8), 0.08)
-	tulo_land_tween.tween_property(self, "tulo_land_scale_multiplier", Vector2.ONE, 0.2).set_ease(Tween.EASE_IN_OUT)
 
 func take_hit(from_position: Vector2, _ignore_dash: bool = false) -> void:
 	var dir = global_position - from_position
@@ -787,7 +759,6 @@ func die(from_position: Vector2 = global_position) -> void:
 	attack_manual_pose = false
 	attack_combo_step = 0
 	crouch_current = 0.0
-	tulo_land_scale_multiplier = Vector2.ONE
 
 	if tul:
 		tul.scale = tulo_original_scale
@@ -802,7 +773,6 @@ func die(from_position: Vector2 = global_position) -> void:
 
 	_kill_tween(hands_tween)
 	_kill_tween(tulo_attack_tween)
-	_kill_tween(tulo_land_tween)
 
 	reset_hands_position()
 
