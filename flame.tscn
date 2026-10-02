@@ -12,6 +12,9 @@
 [ext_resource type="Texture2D" uid="uid://dlgeph2mafuy7" path="res://attacks/spr_flamethrower_explosion_8 2.png" id="9_7paj1"]
 [ext_resource type="Texture2D" uid="uid://crlmsl4pgny3t" path="res://attacks/spr_flamethrower_explosion_9 2.png" id="10_ait6o"]
 
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_3g2yu"]
+blend_mode = 1
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_3g2yu"]
 radius = 9.058436
 
@@ -50,10 +53,11 @@ animations = [{
 }],
 "loop": false,
 "name": &"fly",
-"speed": 30.0
+"speed": 55.0
 }]
 
 [node name="flame" type="Area2D" unique_id=335558109]
+material = SubResource("CanvasItemMaterial_3g2yu")
 collision_layer = 2
 collision_mask = 2
 script = ExtResource("1_3g2yu")
@@ -64,3 +68,5 @@ shape = SubResource("CircleShape2D_3g2yu")
 [node name="fly" type="AnimatedSprite2D" parent="." unique_id=5524740]
 sprite_frames = SubResource("SpriteFrames_4pgmq")
 animation = &"fly"
+
+[node name="PointLight2D" type="PointLight2D" parent="." unique_id=242589694]

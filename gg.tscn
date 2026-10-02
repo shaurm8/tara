@@ -55,6 +55,9 @@ gravity = Vector3(0, 1000, 0)
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_oay4l"]
 light_mode = 1
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_w3qgw"]
+size = Vector2(11.870605, 29.867577)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_hkydd"]
 animations = [{
 "frames": [{
@@ -154,9 +157,6 @@ animations = [{
 radius = 1.486824
 height = 4.788269
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_w3qgw"]
-size = Vector2(11.870605, 29.867577)
-
 [node name="gg" type="CharacterBody2D" unique_id=690415176 groups=["player"]]
 position = Vector2(640, 360)
 collision_mask = 9
@@ -200,6 +200,10 @@ texture = ExtResource("7_tdxqo")
 position = Vector2(0.2508545, -0.19476318)
 zoom = Vector2(3, 3)
 
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=294617524]
+position = Vector2(-1.0100708, 2.0967407)
+shape = SubResource("RectangleShape2D_w3qgw")
+
 [node name="TELO" type="Node2D" parent="." unique_id=1068861480]
 
 [node name="TUL" type="AnimatedSprite2D" parent="TELO" unique_id=1482508438]
@@ -210,7 +214,7 @@ animation = &"walk"
 [node name="RUKI" type="AnimatedSprite2D" parent="TELO" unique_id=125418692]
 position = Vector2(3.4353628, -0.99612427)
 sprite_frames = SubResource("SpriteFrames_uqpq0")
-animation = &"ak_normal"
+animation = &"shotgun_attack"
 
 [node name="BloodMarker" type="Marker2D" parent="TELO/RUKI" unique_id=1100638751]
 position = Vector2(12.748596, 4.970581)
@@ -230,6 +234,5 @@ position = Vector2(5.8970666, -1.35175)
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_uqpq0")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=294617524]
-position = Vector2(-1.0100708, 2.0967407)
-shape = SubResource("RectangleShape2D_w3qgw")
+[node name="MuzzleMarker" type="Marker2D" parent="TELO/RUKI" unique_id=1271636704]
+position = Vector2(26.388733, -2.5357056)
