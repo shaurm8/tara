@@ -27,8 +27,8 @@ animations = [{
 }]
 
 [node name="HuyShot" type="CharacterBody2D" unique_id=1630456077 groups=["enemy"]]
-collision_layer = 3
-collision_mask = 3
+collision_layer = 18
+collision_mask = 18
 script = ExtResource("1_ux1yx")
 bullet_scene = ExtResource("2_32odx")
 

@@ -19,6 +19,8 @@ is_immortal = true
 spawn_blood = false
 
 [node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1394778557]
+collision_layer = 17
+collision_mask = 17
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=35226925]
 shape = SubResource("WorldBoundaryShape2D_c6md4")
