@@ -859,7 +859,7 @@ func _process_death_physics(delta: float) -> void:
 		if telo:
 			telo.rotation = lerp_angle(telo.rotation, sign(facing) * deg_to_rad(85.0), delta * 12.0)
 
-	if (Input.is_key_pressed(KEY_R) or Input.is_action_just_pressed("respawn")) and not is_restarting:
+	if (Input.is_key_pressed(KEY_R) or Input.is_action_just_pressed("r")) and not is_restarting:
 		start_fade_and_restart()
 
 func start_fade_and_restart() -> void:

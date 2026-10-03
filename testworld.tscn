@@ -2,6 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://cmlscs17ilbcx" path="res://dummy.tscn" id="1_mfyh1"]
 [ext_resource type="PackedScene" uid="uid://cvyxxvjrgvfwd" path="res://gg.tscn" id="2_7vjtm"]
+[ext_resource type="PackedScene" uid="uid://b6vs8bhvcbvyv" path="res://huy_shot.tscn" id="3_ow23n"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_c6md4"]
 
@@ -37,3 +38,6 @@ offset_bottom = -109.0
 
 [node name="GG" parent="." unique_id=63969006 instance=ExtResource("2_7vjtm")]
 position = Vector2(61.583588, -24.403177)
+
+[node name="HuyShot" parent="." unique_id=1630456077 instance=ExtResource("3_ow23n")]
+position = Vector2(126.659744, -25.499802)

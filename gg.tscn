@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://vshqm7sjyy4d" path="res://bullet_scene.tscn" id="2_hkydd"]
 [ext_resource type="PackedScene" uid="uid://byl3lf41j7el6" path="res://blood_drop.tscn" id="2_l0stk"]
 [ext_resource type="PackedScene" uid="uid://b84uk24r4eq0u" path="res://flame.tscn" id="3_lmvx7"]
+[ext_resource type="Texture2D" uid="uid://bah1tfusj4pjv" path="res://for-gg/Rectangle 251.png" id="5_ubqhc"]
 [ext_resource type="Texture2D" uid="uid://divjdj8auflsr" path="res://Rectangle 3355.png" id="6_d5do3"]
 [ext_resource type="Texture2D" uid="uid://bi4ew1c36flor" path="res://Group 103.png" id="7_tdxqo"]
 [ext_resource type="Texture2D" uid="uid://t5fnrivq210a" path="res://for-gg/Frame 12.png" id="8_5s8d6"]
@@ -176,6 +177,7 @@ process_material = SubResource("ParticleProcessMaterial_qq8r2")
 position = Vector2(0.08843994, 0.21136475)
 emitting = false
 amount = 4
+texture = ExtResource("5_ubqhc")
 process_material = SubResource("ParticleProcessMaterial_87v8f")
 
 [node name="cas" type="CanvasLayer" parent="." unique_id=1427882384]
@@ -198,7 +200,7 @@ texture = ExtResource("7_tdxqo")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=162209706]
 position = Vector2(0.2508545, -0.19476318)
-zoom = Vector2(3, 3)
+zoom = Vector2(2.3, 2.3)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=294617524]
 position = Vector2(-1.0100708, 2.0967407)
