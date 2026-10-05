@@ -80,10 +80,14 @@ func stick_to_wall() -> void:
 	global_position.x = round(global_position.x / 1.06) * 1.06
 	global_position.y = round(global_position.y / 1.06) * 1.06
 	
-	blood_color = BloodCanvas.register_overlap(global_position)
-	
 	set_process(false)
 	queue_redraw()
+
+	# Если точка уже густая (overlap >= 2), запекаем всю форму на холст и отменяем стекание ✨
+	if BloodCanvas.get_overlap(global_position) >= 2:
+		BloodCanvas.bake_shape(global_position, blood_type, blood_color, dir_x, dir_y, stripe_length, is_diagonal, velocity)
+		queue_free()
+		return
 
 	if randf() < 0.25:
 		_build_stuck_visual()
@@ -93,14 +97,13 @@ func stick_to_wall() -> void:
 		queue_free()
 
 func _start_drip_sequence() -> void:
-	# Пауза перед тем, как капля вообще начнет сползать вниз стала больше ✨
-	await get_tree().create_timer(randf_range(2.0, 5.0)).timeout
+	# 1. Короткая задержка перед стартом (всего 0.2–0.6 сек, сразу начинает течь) ✨
+	await get_tree().create_timer(randf_range(0.2, 0.6)).timeout
 	
 	var steps = randi_range(1, 4)
 	for i in range(steps):
-		# Медленные задержки между каждым шагом на пиксель вниз, чтобы кровь текла лениво и красиво ❤️
-		await get_tree().create_timer(randf_range(3.0, 7.0)).timeout
-		
+		# 2. Очень медленное стекание (каждый шаг вниз ждёт от 2 до 4 секунд!) ❤️
+		await get_tree().create_timer(randf_range(3.0, 5.0)).timeout
 		global_position.y += 1.06
 
 	BloodCanvas.bake_shape(global_position, blood_type, blood_color, dir_x, dir_y, stripe_length, is_diagonal, velocity)

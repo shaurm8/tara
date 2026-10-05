@@ -21,7 +21,7 @@ var lifetime: float = 0.0
 @export var light_fade_in_ratio: float = 0.15            # Скорость появления (15% от жизни)
 
 # === УРОН ===
-@export var tick_damage: float = 3.0          # урон за тик
+@export var tick_damage: float = 20.0          # урон за тик
 @export var tick_interval: float = 0.1        # интервал урона
 @export var wall_slow: float = 0.15           # торможение о стену
 
