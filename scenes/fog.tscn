@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://8s0786b5d055"]
+
+[ext_resource type="Texture2D" uid="uid://da2hsnebguy44" path="res://vfx/spr_dustcloud_0 2 1.png" id="1_ahtbg"]
+[ext_resource type="Texture2D" uid="uid://debwkwmb8ve42" path="res://vfx/spr_dustcloud_2 2 1.png" id="2_e6y3j"]
+[ext_resource type="Texture2D" uid="uid://3dwvkvwxmogt" path="res://vfx/spr_dustcloud_3 2 1.png" id="3_87e3p"]
+[ext_resource type="Texture2D" uid="uid://c1vxhdbkuuohl" path="res://vfx/spr_dustcloud_4 2 1.png" id="4_pqejw"]
+[ext_resource type="Texture2D" uid="uid://csu4ow1kkgcl7" path="res://vfx/spr_dustcloud_6 2 1.png" id="5_ia7rs"]
+[ext_resource type="Script" uid="uid://bmi6y6nkt2asf" path="res://scenes/fog.gd" id="6_e6y3j"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_416v5"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_ahtbg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_e6y3j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_87e3p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_e6y3j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_87e3p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_pqejw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_e6y3j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_pqejw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_ia7rs")
+}],
+"loop": false,
+"name": &"fog",
+"speed": 25.0
+}]
+
+[node name="fog" type="AnimatedSprite2D" unique_id=291623175]
+sprite_frames = SubResource("SpriteFrames_416v5")
+animation = &"fog"
+script = ExtResource("6_e6y3j")

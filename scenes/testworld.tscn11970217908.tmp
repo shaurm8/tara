@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://uayl84egfoe0"]
+
+[ext_resource type="PackedScene" uid="uid://cmlscs17ilbcx" path="res://scenes/dummy.tscn" id="1_y0jy5"]
+[ext_resource type="PackedScene" uid="uid://cvyxxvjrgvfwd" path="res://scenes/gg.tscn" id="2_4ccfe"]
+[ext_resource type="PackedScene" uid="uid://b6vs8bhvcbvyv" path="res://scenes/huy_shot.tscn" id="3_y52uh"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_c6md4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7vjtm"]
+size = Vector2(1258, 418)
+
+[node name="testworld" type="Node2D" unique_id=711683134]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=559612832]
+
+[node name="dummy" parent="." unique_id=1143341371 instance=ExtResource("1_y0jy5")]
+position = Vector2(44.335625, -9.916208)
+is_immortal = true
+spawn_blood = false
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1394778557]
+collision_layer = 17
+collision_mask = 17
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=35226925]
+shape = SubResource("WorldBoundaryShape2D_c6md4")
+
+[node name="StaticBody2D2" type="StaticBody2D" parent="." unique_id=99126406]
+position = Vector2(-568, 104)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D2" unique_id=564655119]
+position = Vector2(1776, -318)
+shape = SubResource("RectangleShape2D_7vjtm")
+
+[node name="ColorRect" type="ColorRect" parent="StaticBody2D2" unique_id=1103645677]
+offset_left = 1147.0
+offset_top = -528.0
+offset_right = 2404.0
+offset_bottom = -109.0
+
+[node name="GG" parent="." unique_id=63969006 instance=ExtResource("2_4ccfe")]
+position = Vector2(61.583588, -24.403177)
+
+[node name="HuyShot" parent="." unique_id=1630456077 instance=ExtResource("3_y52uh")]
+position = Vector2(126.659744, -25.499802)

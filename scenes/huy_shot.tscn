@@ -1,0 +1,54 @@
+[gd_scene format=3 uid="uid://b6vs8bhvcbvyv"]
+
+[ext_resource type="Script" uid="uid://drichqja6s0ut" path="res://gds/huy_shot.gd" id="1_ux1yx"]
+[ext_resource type="PackedScene" uid="uid://nfebttbt5l1f" path="res://scenes/enemy_bullet.tscn" id="2_32odx"]
+[ext_resource type="Texture2D" uid="uid://bn0ijp8gc03s0" path="res://for-gg/Vector.png" id="2_xbhc4"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_almf7"]
+size = Vector2(12, 17)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_26fkl"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_xbhc4")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 75.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_xbhc4")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[node name="HuyShot" type="CharacterBody2D" unique_id=1630456077 groups=["enemy"]]
+collision_layer = 18
+collision_mask = 18
+script = ExtResource("1_ux1yx")
+bullet_scene = ExtResource("2_32odx")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1066119968]
+position = Vector2(0, 2.5)
+shape = SubResource("RectangleShape2D_almf7")
+
+[node name="TELO" type="Node2D" parent="." unique_id=160817803]
+
+[node name="ColorRect" type="ColorRect" parent="TELO" unique_id=1565308904]
+offset_left = -6.0
+offset_top = -6.0
+offset_right = 6.0
+offset_bottom = 11.0
+
+[node name="TUL" type="Sprite2D" parent="TELO" unique_id=622877619]
+
+[node name="HandsAnimatedSprite" type="AnimatedSprite2D" parent="TELO" unique_id=1865141979 groups=["enemy"]]
+position = Vector2(1, 3)
+sprite_frames = SubResource("SpriteFrames_26fkl")
+animation = &"attack"
+
+[node name="RayCast2D" type="RayCast2D" parent="." unique_id=945958803]
