@@ -230,12 +230,11 @@ func _update_visuals_and_animations(delta: float) -> void:
 	if not (hands and hands.is_busy()):
 		face_mouse(1.0)
 
-	crouch_current = lerpf(crouch_current, float(is_on_floor() and dir == 0 and Input.is_action_pressed("s")), delta * CROUCH_SPEED)
 	if tul:
 		var anim := "walk" if (dir != 0 and is_on_floor()) else "idle"
 		if tul.animation != anim:
 			tul.play(anim)
-		tul.position.y = tul_base_y + crouch_current * CROUCH_OFFSET
+		tul.position.y = tul_base_y
 
 func take_hit(arg1, arg2 = null, _ignore_dash: bool = false) -> void:
 	var damage = 1

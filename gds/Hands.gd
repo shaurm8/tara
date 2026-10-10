@@ -101,6 +101,14 @@ const HUD_OUTLINE_COLOR: Color = Color(0.45, 0.35, 0.0)
 @export_enum("Правый нижний", "Левый нижний", "Правый верхний", "Левый верхний") var hud_corner: int = 0
 ## Отступ HUD от выбранного угла в пикселях экрана (положительные значения сдвигают внутрь экрана)
 @export var hud_offset: Vector2 = Vector2(8, 8)
+## Прозрачность тени под панелью (0 = без тени)
+@export_range(0.0, 1.0) var hud_shadow_alpha: float = 0.4
+## Смещение тени панели в пикселях исходной картинки (умножается на Hud Scale)
+@export var hud_shadow_offset: Vector2 = Vector2(1, 1)
+## Насколько число «подскакивает» при изменении (0 = без анимации)
+@export_range(0.0, 0.5) var hud_pop_strength: float = 0.18
+## Доля боезапаса, ниже которой число начинает мигать красным
+@export_range(0.0, 1.0) var hud_low_ammo_fraction: float = 0.25
 
 @onready var sprite: AnimatedSprite2D = _get_sprite()
 @onready var chainsaw_hitbox: Area2D = get_node_or_null("Hitbox")
@@ -117,6 +125,12 @@ var _hud_root: Control
 var _hud_panel: TextureRect
 var _hud_label: Label
 var _hud_debug_rect: ColorRect
+var _hud_shadow: TextureRect
+var _hud_pop_tween: Tween
+var _hud_slide_tween: Tween
+var _hud_slide: float = 1.0
+var _hud_last_shown: int = -1
+var _hud_time: float = 0.0
 var _hud_weapon: int = -1
 
 var shoot_cooldown: float = 0.0
@@ -163,8 +177,8 @@ func _ready() -> void:
 		if not chainsaw_hitbox.body_entered.is_connected(_on_chainsaw_body_entered):
 			chainsaw_hitbox.body_entered.connect(_on_chainsaw_body_entered)
 
-func _process(_delta: float) -> void:
-	_update_hud()
+func _process(delta: float) -> void:
+	_update_hud(delta)
 
 func _get_sprite() -> AnimatedSprite2D:
 	var n: Node = self
@@ -219,6 +233,14 @@ func _build_hud() -> void:
 	_hud_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_hud_layer.add_child(_hud_root)
 
+	# Тень рисуется раньше панели, поэтому лежит под ней
+	_hud_shadow = TextureRect.new()
+	_hud_shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud_shadow.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_hud_shadow.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_hud_shadow.stretch_mode = TextureRect.STRETCH_SCALE
+	_hud_root.add_child(_hud_shadow)
+
 	_hud_panel = TextureRect.new()
 	_hud_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_hud_panel.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -236,6 +258,10 @@ func _build_hud() -> void:
 	if hud_outline_size > 0:
 		_hud_label.add_theme_constant_override("outline_size", int(hud_outline_size * hud_scale))
 		_hud_label.add_theme_color_override("font_outline_color", HUD_OUTLINE_COLOR)
+	# Тень текста: цифра читается на любом фоне
+	_hud_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.65))
+	_hud_label.add_theme_constant_override("shadow_offset_x", maxi(1, int(round(hud_scale / 2.0))))
+	_hud_label.add_theme_constant_override("shadow_offset_y", maxi(1, int(round(hud_scale / 2.0))))
 	_hud_panel.add_child(_hud_label)
 
 	# Отладочный квадрат: если его не видно, проблема не в панели и не в числе,
@@ -261,12 +287,22 @@ func _apply_hud_weapon() -> void:
 		base_size = Vector2(64, 32)
 	_hud_panel.texture = tex
 	_hud_panel.size = base_size * hud_scale
+	_hud_shadow.texture = tex
+	_hud_shadow.size = _hud_panel.size
 	_hud_label.position = hud_number_rect.position * hud_scale
 	_hud_label.size = hud_number_rect.size * hud_scale
+	_hud_label.pivot_offset = _hud_label.size / 2.0
+	_hud_last_shown = -1  # смена оружия не должна вызывать «подскок» числа
+	# Панель выезжает и проявляется при смене оружия
+	_hud_slide = 0.0
+	_kill_tween(_hud_slide_tween)
+	_hud_slide_tween = create_tween()
+	_hud_slide_tween.tween_property(self, "_hud_slide", 1.0, 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	if hud_debug:
 		print("[HUD] оружие=", _hud_weapon, " текстура=", tex, " размер панели=", _hud_panel.size)
 
-func _update_hud() -> void:
+func _update_hud(delta: float) -> void:
+	_hud_time += delta
 	if not _hud_panel:
 		return
 	if _hud_weapon != int(current_weapon):
@@ -285,9 +321,40 @@ func _update_hud() -> void:
 		_hud_debug_rect.visible = hud_debug
 		_hud_debug_rect.position = vp - _hud_debug_rect.size - Vector2.ONE * 2.0
 
-	var amount: float = ammo[int(current_weapon)]
-	_hud_label.text = str(ceili(amount))
-	_hud_label.add_theme_color_override("font_color", HUD_COLOR_EMPTY if amount <= 0.0 else HUD_COLOR_NORMAL)
+	# Выезд панели при смене оружия
+	var slide_dir: float = 1.0 if (hud_corner == 0 or hud_corner == 2) else -1.0
+	_hud_panel.position.x += slide_dir * (1.0 - _hud_slide) * _hud_panel.size.x * 0.5
+	_hud_panel.modulate.a = clampf(_hud_slide, 0.0, 1.0)
+	if _hud_shadow:
+		_hud_shadow.size = _hud_panel.size
+		_hud_shadow.position = _hud_panel.position + hud_shadow_offset * hud_scale
+		_hud_shadow.modulate = Color(0, 0, 0, hud_shadow_alpha * clampf(_hud_slide, 0.0, 1.0))
+
+	var weapon_id: int = int(current_weapon)
+	var amount: float = ammo[weapon_id]
+	var shown: int = ceili(amount)
+	_hud_label.text = str(shown)
+	if shown != _hud_last_shown:
+		if _hud_last_shown != -1:
+			_hud_pop()
+		_hud_last_shown = shown
+
+	# Цвет числа: обычный, мигает при малом боезапасе, красный при нуле
+	var color: Color = HUD_COLOR_NORMAL
+	if amount <= 0.0:
+		color = HUD_COLOR_EMPTY
+	elif amount <= float(AMMO_MAX[weapon_id]) * hud_low_ammo_fraction:
+		var pulse: float = 0.5 + 0.5 * sin(_hud_time * 12.0)
+		color = HUD_COLOR_NORMAL.lerp(HUD_COLOR_EMPTY, pulse)
+	_hud_label.add_theme_color_override("font_color", color)
+
+func _hud_pop() -> void:
+	if hud_pop_strength <= 0.0:
+		return
+	_kill_tween(_hud_pop_tween)
+	_hud_label.scale = Vector2.ONE * (1.0 + hud_pop_strength)
+	_hud_pop_tween = _hud_label.create_tween()
+	_hud_pop_tween.tween_property(_hud_label, "scale", Vector2.ONE, 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 # --- Остальное ---
 
@@ -497,12 +564,15 @@ func reset_hands_position() -> void:
 	hands_tween.parallel().tween_property(self, "rotation", origin_rotation, 0.1)
 
 func _update_trail(delta: float) -> void:
-	if not sprite or not (is_attacking or is_saw_pushing):
+	# Шлейф только во время взмаха (не при push, не при ходьбе/падении)
+	var parent := get_parent() as Node2D
+	if not sprite or not parent or not (is_attacking or is_saw_pushing):
 		trail_timer = 0.0
 		trail_has_prev = false
 		return
 
-	var current := sprite.global_transform
+	# Трансформ спрайта в координатах игрока: движение игрока сюда не попадает
+	var current: Transform2D = parent.global_transform.affine_inverse() * sprite.global_transform
 	if not trail_has_prev:
 		trail_prev_xform = current
 		trail_has_prev = true
@@ -514,10 +584,10 @@ func _update_trail(delta: float) -> void:
 
 	for i in TRAIL_GHOSTS_PER_FRAME:
 		var w := float(i + 1) / float(TRAIL_GHOSTS_PER_FRAME)
-		_spawn_trail_ghost(trail_prev_xform.interpolate_with(current, w))
+		_spawn_trail_ghost(parent, trail_prev_xform.interpolate_with(current, w))
 	trail_prev_xform = current
 
-func _spawn_trail_ghost(xform: Transform2D) -> void:
+func _spawn_trail_ghost(parent: Node2D, local_xform: Transform2D) -> void:
 	if not sprite.sprite_frames:
 		return
 	var tex := sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
@@ -533,11 +603,12 @@ func _spawn_trail_ghost(xform: Transform2D) -> void:
 	ghost.flip_v = sprite.flip_v
 	ghost.material = sprite.material
 	ghost.texture_filter = sprite.texture_filter
+	ghost.z_as_relative = false
 	ghost.z_index = TRAIL_Z_INDEX
 	ghost.modulate = Color(1.0, 1.0, 1.0, TRAIL_START_ALPHA)
 
-	get_tree().current_scene.add_child(ghost)
-	ghost.global_transform = xform
+	parent.add_child(ghost)   # дочерний узел игрока, едет вместе с ним
+	ghost.transform = local_xform
 
 	var tween := ghost.create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	tween.tween_property(ghost, "modulate:a", 0.0, TRAIL_LIFETIME)
