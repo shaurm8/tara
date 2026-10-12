@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://nvkhofxolvqb"]
+
+[ext_resource type="Script" uid="uid://8yja1jjaedir" path="res://gds/patron.gd" id="1_6ug47"]
+[ext_resource type="Texture2D" uid="uid://dh4nuwfu34xow" path="res://item_spr/Group 123.png" id="1_ua242"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_e6yj1"]
+radius = 5.0
+
+[node name="smes" type="Area2D" unique_id=161296559]
+script = ExtResource("1_6ug47")
+weapon = 4
+amount = 50.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=20476720]
+shape = SubResource("CircleShape2D_e6yj1")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1010764939]
+texture = ExtResource("1_ua242")

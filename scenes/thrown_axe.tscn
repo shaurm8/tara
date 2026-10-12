@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://2aaf6u5dufsv"]
+
+[ext_resource type="Script" uid="uid://2d3pa1toy5s7" path="res://scenes/thrown_axe.gd" id="1_f3sgo"]
+[ext_resource type="Texture2D" uid="uid://cl8oxdmnr4pvb" path="res://for-gg/Group 138.png" id="2_q0r3v"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_garrm"]
+radius = 13.992516
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_q0r3v"]
+a = Vector2(-6.076021, 1.5347767)
+b = Vector2(10.845619, -1.3827486)
+
+[node name="ThrownAxe" type="RigidBody2D" unique_id=1653257599]
+collision_layer = 16
+collision_mask = 16
+script = ExtResource("1_f3sgo")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1701671665]
+collision_layer = 3
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1161656619]
+shape = SubResource("CircleShape2D_garrm")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=161311790]
+texture = ExtResource("2_q0r3v")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=791348343]
+position = Vector2(-2.108036, 1.6087646)
+shape = SubResource("SegmentShape2D_q0r3v")

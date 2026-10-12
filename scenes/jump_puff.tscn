@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://j1xoxkack8wi" path="res://vfx/spr_jumpcloud_1 1.png" id="2_boycw"]
 [ext_resource type="Texture2D" uid="uid://c3r01mds2hgj3" path="res://vfx/spr_jumpcloud_2 1.png" id="3_ijpwr"]
 [ext_resource type="Texture2D" uid="uid://bsvsudej87ftl" path="res://vfx/spr_jumpcloud_3 1.png" id="4_7ty1g"]
-[ext_resource type="Script" uid="uid://5dbh0qwfs46b" path="res://scenes/jump_puff.gd" id="5_8w1jo"]
+[ext_resource type="Script" uid="uid://5dbh0qwfs46b" path="res://gds/jump_puff.gd" id="5_8w1jo"]
 [ext_resource type="Texture2D" uid="uid://ct5jvdd050drv" path="res://vfx/spr_landcloud_0 3.png" id="5_juop5"]
 [ext_resource type="Texture2D" uid="uid://cyctr4oqpkako" path="res://vfx/spr_landcloud_2 3.png" id="6_l6ae4"]
 [ext_resource type="Texture2D" uid="uid://dj54drtsdqk4g" path="res://vfx/spr_landcloud_3 3.png" id="7_rlt5d"]
