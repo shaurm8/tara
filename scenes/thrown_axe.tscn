@@ -4,11 +4,11 @@
 [ext_resource type="Texture2D" uid="uid://cl8oxdmnr4pvb" path="res://for-gg/Group 138.png" id="2_q0r3v"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_garrm"]
-radius = 13.992516
+radius = 18.074594
 
 [sub_resource type="SegmentShape2D" id="SegmentShape2D_q0r3v"]
-a = Vector2(-6.076021, 1.5347767)
-b = Vector2(10.845619, -1.3827486)
+a = Vector2(-10.267671, 2.3224754)
+b = Vector2(17.973965, -2.9040604)
 
 [node name="ThrownAxe" type="RigidBody2D" unique_id=1653257599]
 collision_layer = 16
@@ -28,3 +28,9 @@ texture = ExtResource("2_q0r3v")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=791348343]
 position = Vector2(-2.108036, 1.6087646)
 shape = SubResource("SegmentShape2D_q0r3v")
+
+[node name="BladeMarker" type="Marker2D" parent="." unique_id=659215034]
+position = Vector2(14.053617, 0.024249077)
+
+[node name="HandleMarker" type="Marker2D" parent="." unique_id=1293632612]
+position = Vector2(-12.254854, 3.7319298)
