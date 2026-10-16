@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://crl865lj0agqc" path="res://scenes/benzin.tscn" id="5_0q2lx"]
 [ext_resource type="PackedScene" uid="uid://dnvjuxggvria8" path="res://scenes/pulaa.tscn" id="6_m15qw"]
 [ext_resource type="PackedScene" uid="uid://nvkhofxolvqb" path="res://scenes/smes.tscn" id="7_m15qw"]
+[ext_resource type="PackedScene" uid="uid://crepdn4uh6r5g" path="res://scenes/cat.tscn" id="8_n3dnb"]
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_c6md4"]
 distance = 4.5017605
@@ -73,3 +74,6 @@ position = Vector2(-96.72565, -18.842934)
 
 [node name="smes" parent="." unique_id=161296559 instance=ExtResource("7_m15qw")]
 position = Vector2(-113.38111, -12.67424)
+
+[node name="cat" parent="." unique_id=1485166711 instance=ExtResource("8_n3dnb")]
+position = Vector2(-7.7562923, -12.4863825)
