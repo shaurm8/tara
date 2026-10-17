@@ -53,7 +53,6 @@ const FLAME_SPEED_MAX: float = 650.0
 const FLAME_RAMP_UP_TIME: float = 0.12
 const FLAME_RAMP_DOWN_TIME: float = 0.15
 
-# --- Топор ---
 const AXE_ARC_HALF: float = deg_to_rad(60.0)
 const AXE_ARC_RADIUS: float = 16.0
 const AXE_WINDUP_EXTRA: float = 0.35
@@ -83,7 +82,6 @@ const AXE_HIT_SHAKE_DURATION: float = 0.15
 const AXE_BLOOD_DROPS_MIN: int = 500
 const AXE_BLOOD_DROPS_MAX: int = 600
 
-# --- Бросок топора ---
 const AXE_THROW_COST: float = 40.0
 const AXE_THROW_SPEED: float = 750.0
 
@@ -96,7 +94,6 @@ const TRAIL_Z_INDEX: int = 0
 const WEAPON_PREFIX: Array[String] = ["axe_", "saw_", "shotgun_", "ak_", "flame_"]
 enum WeaponType { AXE, SAW, SHOTGUN, AK, FLAMETHROWER }
 
-# --- Боеприпасы ---
 const AMMO_MAX: Dictionary = {
 	WeaponType.AXE: 100.0,
 	WeaponType.SAW: 100.0,
@@ -223,8 +220,6 @@ func _find_player():
 
 func is_busy() -> bool: return is_attacking or is_saw_pushing
 
-# --- Боеприпасы, Подбор и HUD ---
-
 func refill_all() -> void:
 	for w in AMMO_MAX: ammo[w] = AMMO_MAX[w]
 
@@ -250,8 +245,7 @@ func _has_ammo_for_current() -> bool:
 func pick_up_axe() -> void:
 	is_axe_thrown = false
 	refill_all()
-	if current_weapon == WeaponType.AXE and sprite:
-		sprite.play("axe_normal")
+	if current_weapon == WeaponType.AXE and sprite: sprite.play("axe_normal")
 
 func _setup_hud_texture_rect(tr: TextureRect) -> void:
 	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -364,8 +358,6 @@ func _hud_pop() -> void:
 	_hud_pop_tween = _hud_label.create_tween()
 	_hud_pop_tween.tween_property(_hud_label, "scale", Vector2.ONE, 0.14).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
-# --- Остальное ---
-
 func has_saw_targets() -> bool: return not _saw_targets().is_empty()
 func on_player_died() -> void: _stop_saw_push(); _cancel_saw_charge()
 
@@ -465,69 +457,37 @@ func _handle_weapon_inputs(delta: float) -> void:
 
 func _throw_axe() -> void:
 	is_attacking = true
-	
-	# Считаем прицел от текущей точки
-	var start_aim = get_aim_angle_local()
-	var windup_angle = start_aim - AXE_ARC_HALF * (1.0 + AXE_WINDUP_EXTRA)
-	var windup_time: float = 0.08
-	
-	# Стандартный наклон для замаха
-	var lean_standard = 0.1 * player.facing
-	
-	# 1. Замах назад
-	_kill_tween(hands_tween)
-	hands_tween = _new_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	var windup_time := 0.08
+	var windup_angle := get_aim_angle_local() - AXE_ARC_HALF * (1.0 + AXE_WINDUP_EXTRA)
+
+	hands_tween = _new_tween(hands_tween).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	hands_tween.tween_method(_apply_slash_pose.bind(rotation, windup_angle, AXE_ARC_RADIUS), 0.0, 1.0, windup_time)
-	player.body_lean(-lean_standard, windup_time)
-	
+	player.body_lean(-0.1 * player.facing, windup_time)
 	await hands_tween.finished
-	
-	# 2. Мгновенно пересчитываем СВЕЖИЙ угол прицела после замаха
-	var fresh_aim_local = get_aim_angle_local()
-	var fresh_aim_world = _local_angle_to_world(fresh_aim_local)
-	
-	# Фиксируем руки в точке release (отпускания) перед спавном топора
+
+	var fresh_aim_local := get_aim_angle_local()
 	rotation = fresh_aim_local
 	position = origin_position + Vector2.from_angle(fresh_aim_local) * AXE_ARC_RADIUS
-	
+
 	is_axe_thrown = true
-	if sprite:
-		sprite.play("axe_empty")
-		
+	if sprite: sprite.play("axe_empty")
+
 	if thrown_axe_scene:
-		var muzzle = _get_muzzle_position()
-		var axe_node = thrown_axe_scene.instantiate()
-		get_tree().current_scene.add_child(axe_node)
-		axe_node.global_position = muzzle
+		var axe_node = _spawn(thrown_axe_scene, _get_muzzle_position())
 		if axe_node.has_method("setup"):
-			axe_node.setup(player, self, fresh_aim_world, AXE_THROW_SPEED)
-			
-	# --- ВОТ ТУТ ДОБАВЛЯЕМ МЯСНОЙ ИМПАКТ (то, что ты хотел!) ---
-	
-	# Параметры супер-сочного импакта
-	var follow_through_time: float = 0.12 # Время до остановки рук
-	var throw_impact_lean: float = 0.35 * player.facing # Намного более сильный поворот корпуса! (был 0.1)
-	var extended_radius: float = 35.0 # Уводим руки ОЧЕНЬ далеко вперед! (стандарт AXE_ARC_RADIUS был 16.0)
-	
-	# Мощная тряска экрана именно в момент броска
-	player.start_shake(6.0, 0.15) 
-	
-	# Сильный наклон/поворот корпуса игрока в сторону броска
-	player.body_lean_strike(throw_impact_lean, follow_through_time) 
-	
-	# Плавный, но резкий вынос рук далеко вперед по инерции броска
+			axe_node.setup(player, self, _local_angle_to_world(fresh_aim_local), AXE_THROW_SPEED)
+
+	const FOLLOW_THROUGH_TIME: float = 0.12
+	const EXTENDED_RADIUS: float = 35.0
+	player.start_shake(6.0, 0.15)
+	player.body_lean_strike(0.35 * player.facing, FOLLOW_THROUGH_TIME)
+
+	var throw_pose_angle := fresh_aim_local + AXE_ARC_HALF * 0.4
 	hands_tween = _new_tween().set_trans(Tween.TRANS_EXPO).set_ease(Tween.EASE_OUT).set_parallel(true)
-	
-	# Доворачиваем угол рук по инерции дуги
-	var throw_pose_angle = fresh_aim_local + AXE_ARC_HALF * 0.4
-	hands_tween.tween_property(self, "rotation", throw_pose_angle, follow_through_time)
-	
-	# Уводим позицию рук на УВЕЛИЧЕННЫЙ радиус далеко вперед!
-	var extended_pos = origin_position + Vector2.from_angle(throw_pose_angle) * extended_radius
-	hands_tween.tween_property(self, "position", extended_pos, follow_through_time)
-	
-	await get_tree().create_timer(follow_through_time).timeout
-	
+	hands_tween.tween_property(self, "rotation", throw_pose_angle, FOLLOW_THROUGH_TIME)
+	hands_tween.tween_property(self, "position", origin_position + Vector2.from_angle(throw_pose_angle) * EXTENDED_RADIUS, FOLLOW_THROUGH_TIME)
+
+	await get_tree().create_timer(FOLLOW_THROUGH_TIME).timeout
 	is_attacking = false
 	reset_hands_position()
 
@@ -553,8 +513,7 @@ func _handle_saw_charge(delta: float, rmb_held: bool) -> void:
 		if saw_rmb_hold >= SAW_TAP_MAX_TIME and not is_saw_charging:
 			is_saw_charging = true
 			saw_charge_time = 0.0
-		if is_saw_charging:
-			saw_charge_time = minf(saw_charge_time + delta, SAW_CHARGE_TIME)
+		if is_saw_charging: saw_charge_time = minf(saw_charge_time + delta, SAW_CHARGE_TIME)
 		return
 
 	if is_saw_charging:
@@ -602,8 +561,7 @@ func _update_hands_position(delta: float) -> void:
 
 func _update_charge_pose(delta: float) -> void:
 	var t := saw_charge_time / SAW_CHARGE_TIME
-	var aim := get_aim_angle_local()
-	var windup_angle := aim - SLASH_ARC_HALF * t
+	var windup_angle := get_aim_angle_local() - SLASH_ARC_HALF * t
 	var target_pos := origin_position + _shake_offset(lerpf(0.35, 3.0, t)) + Vector2.from_angle(windup_angle) * SLASH_ARC_RADIUS * t
 	var target_rot := windup_angle + sin(chainsaw_shake_time * 3.1) * deg_to_rad(2.0) * t
 	position = position.lerp(target_pos, delta * 15.0)
@@ -629,8 +587,7 @@ func _update_trail(delta: float) -> void:
 	trail_timer = TRAIL_SPAWN_INTERVAL
 
 	for i in TRAIL_GHOSTS_PER_FRAME:
-		var w := float(i + 1) / float(TRAIL_GHOSTS_PER_FRAME)
-		_spawn_trail_ghost(parent, trail_prev_xform.interpolate_with(current, w))
+		_spawn_trail_ghost(parent, trail_prev_xform.interpolate_with(current, float(i + 1) / float(TRAIL_GHOSTS_PER_FRAME)))
 	trail_prev_xform = current
 
 func _spawn_trail_ghost(parent: Node2D, local_xform: Transform2D) -> void:
@@ -739,8 +696,6 @@ func _spawn_flame_burst() -> void:
 		tween.tween_property(bullet, "scale", target_scale, 0.05).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 		tween.tween_property(bullet, "modulate:a", 1.0, 0.04)
 
-# --- Топор ---
-
 func _axe_interval() -> float:
 	var stamina: float = ammo[WeaponType.AXE]
 	if stamina <= 0.0: return AXE_INTERVAL_EMPTY
@@ -838,8 +793,7 @@ func _axe_sweep(t0: float, t1: float, start_angle: float, end_angle: float, radi
 	var shape_in_hands: Transform2D = chainsaw_hitbox.transform * shape_node.transform
 	var space := get_world_2d().direct_space_state
 	for i in range(1, 6):
-		var tt: float = lerpf(t0, t1, float(i) / 5.0)
-		var ang: float = lerp_angle(start_angle, end_angle, tt)
+		var ang: float = lerp_angle(start_angle, end_angle, lerpf(t0, t1, float(i) / 5.0))
 		params.transform = parent.global_transform * Transform2D(ang, scale, 0.0, origin_position + Vector2.from_angle(ang) * radius) * shape_in_hands
 		for r in space.intersect_shape(params, 16):
 			var col = r.get("collider")
@@ -861,8 +815,6 @@ func spawn_axe_blood(spawn_pos: Vector2, cut_angle: float) -> void:
 		if dir_roll < 0.55: _blood_drop(spawn_pos, cut_angle, 21.1, 1.76, 50.0, speed)
 		elif dir_roll < 0.85: _blood_drop(spawn_pos, randf() * TAU, 10.0, 1.76, 0.0, speed * 0.6)
 		else: _blood_drop(spawn_pos, cut_angle + PI, 21.1, 1.76, 35.0, speed * 0.7)
-
-# --- Пила ---
 
 func perform_chainsaw_attack_visual(is_ult: bool = false) -> void:
 	if not _spend(WeaponType.SAW, SAW_SLASH_COST): return
