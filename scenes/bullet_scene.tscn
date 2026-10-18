@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dpc1f4ah68h7h" path="res://gds/bullet_scene.gd" id="1_aic6c"]
 [ext_resource type="Texture2D" uid="uid://b4a8kio7fp2cc" path="res://attacks/Group 70.png" id="2_bx881"]
 [ext_resource type="PackedScene" uid="uid://byl3lf41j7el6" path="res://scenes/blood_drop.tscn" id="2_lg3i7"]
+[ext_resource type="Texture2D" uid="uid://bckic2j8u46aa" path="res://attacks/Group 144.png" id="3_5v4yv"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_bx881"]
 blend_mode = 1
@@ -18,6 +19,7 @@ collision_mask = 2
 script = ExtResource("1_aic6c")
 enable_trail = false
 blood_drop_scene = ExtResource("2_lg3i7")
+bloodied_bullet_texture = ExtResource("3_5v4yv")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=474369230]
 position = Vector2(-5, 0)

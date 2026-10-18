@@ -18,7 +18,13 @@ var hit_targets: Array[Node2D] = [] # Запомненные цели ✨
 var points_queue: Array[Vector2] = []
 var trail_drawer: PixelTrailDrawer
 
+# === СПРАЙТ ПУЛИ ===
+var sprite: Sprite2D = null
+@export var bloodied_bullet_texture: Texture2D # Текстура окровавленной пули
+@export var bloodied_trail_color: Color = Color(0.75, 0.1, 0.1, 0.5) # Шлейф после пробития
+
 func _ready() -> void:
+	sprite = find_child("Sprite2D") as Sprite2D # Находим спрайт внутри сцены пули
 	if not is_connected("body_entered", Callable(self, "_on_body_entered")):
 		body_entered.connect(_on_body_entered)
 	if not is_connected("area_entered", Callable(self, "_on_area_entered")):
@@ -93,9 +99,16 @@ func _handle_hit(target: Node2D) -> void:
 		# Если выстрел в упор и это первый враг — с вероятностью 50% пуля не уничтожается ❤️
 		var is_point_blank = lifetime <= point_blank_time
 		if is_first_target and is_point_blank and randf() < pierce_chance:
+			_become_bloodied() # Меняем спрайт на окровавленный ✨
 			return # Пуля прошивает первого врага насквозь ✨
 		
 		_destroy_bullet()
+
+# Меняем внешность пули после пробития насквозь
+func _become_bloodied() -> void:
+	if sprite and bloodied_bullet_texture:
+		sprite.texture = bloodied_bullet_texture
+	TRAIL_COLOR = bloodied_trail_color # Шлейф становится кровавым ✨
 
 func spawn_shotgun_hit_blood(hit_pos: Vector2, hit_dir: Vector2) -> void:
 	if not blood_drop_scene:

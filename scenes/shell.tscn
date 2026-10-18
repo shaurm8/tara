@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://sqqmw2rwq7ml"]
+
+[ext_resource type="Script" uid="uid://wjedbycn7ugk" path="res://gds/shell.gd" id="1_sb42f"]
+[ext_resource type="Texture2D" uid="uid://dow812431mbyp" path="res://item_spr/Group 158.png" id="2_6fq18"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6fuaf"]
+size = Vector2(4.015625, 2)
+
+[node name="Shell" type="RigidBody2D" unique_id=81671625]
+collision_layer = 16
+collision_mask = 16
+script = ExtResource("1_sb42f")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=190690518]
+texture = ExtResource("2_6fq18")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=230129630]
+shape = SubResource("RectangleShape2D_6fuaf")
