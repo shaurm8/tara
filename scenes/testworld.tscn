@@ -76,4 +76,4 @@ position = Vector2(-96.72565, -18.842934)
 position = Vector2(-113.38111, -12.67424)
 
 [node name="cat" parent="." unique_id=1485166711 instance=ExtResource("8_n3dnb")]
-position = Vector2(-7.7562923, -12.4863825)
+position = Vector2(-22.841232, -12.669884)

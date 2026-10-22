@@ -166,7 +166,6 @@ func drain(weapon: int, amount: float) -> void:
 
 func pick_up_axe() -> void:
 	is_axe_thrown = false
-	refill_all()
 	if current_weapon == WeaponType.AXE and sprite: sprite.play("axe_normal")
 
 # ---------- HUD ----------

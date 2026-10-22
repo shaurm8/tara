@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://c10cq1bry2y1f"]
+
+[ext_resource type="Texture2D" uid="uid://cd2apiev5yi2t" path="res://vfx/Group 181.png" id="1_rms5f"]
+[ext_resource type="Texture2D" uid="uid://dfwlfpcl31ltu" path="res://vfx/Group 180.png" id="2_n3n76"]
+[ext_resource type="Texture2D" uid="uid://bkfbeysynk36n" path="res://vfx/Group 179.png" id="3_j7epj"]
+[ext_resource type="Texture2D" uid="uid://dlnmqs2icwq2n" path="res://vfx/Group 178.png" id="4_jmh0c"]
+[ext_resource type="Texture2D" uid="uid://bo1pdily5r33u" path="res://vfx/Group 177.png" id="5_vr43f"]
+[ext_resource type="Script" uid="uid://dgaptdf6qf2ek" path="res://gds/smoke.gd" id="6_n3n76"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vb5ru"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_rms5f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_n3n76")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_j7epj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_n3n76")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_j7epj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_n3n76")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_j7epj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_jmh0c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_j7epj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_jmh0c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_j7epj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_jmh0c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_jmh0c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_vr43f")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_vr43f")
+}],
+"loop": false,
+"name": &"fog",
+"speed": 25.0
+}]
+
+[node name="smoke" type="AnimatedSprite2D" unique_id=7382655]
+sprite_frames = SubResource("SpriteFrames_vb5ru")
+animation = &"fog"
+script = ExtResource("6_n3n76")
