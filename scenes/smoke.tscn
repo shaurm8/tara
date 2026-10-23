@@ -64,3 +64,4 @@ animations = [{
 sprite_frames = SubResource("SpriteFrames_vb5ru")
 animation = &"fog"
 script = ExtResource("6_n3n76")
+classic_trail_enabled = false

@@ -24,6 +24,7 @@ var hit_dir_strength: float = 0.6
 
 # === ПОЛ / СТЕНЫ ===
 var world_mask: int = 1                # слои физики, от которых отскакивают куски (только пол и стены!)
+var exclude_rids: Array = []           # тела, которые куски игнорируют (враг, из которого они вылетели)
 var bounce: float = 0.35
 var surface_friction: float = 0.4
 var rest_speed: float = 45.0
@@ -76,6 +77,7 @@ class Piece:
 var _tint: Color = Color.WHITE
 var _pieces: Array[Piece] = []
 var _trail_left: int = 0
+var _exclude: Array[RID] = []
 var _fading: bool = false
 
 static func spawn(source: AnimatedSprite2D, hit_dir: Vector2 = Vector2.ZERO, config: Dictionary = {}) -> GibBurst:
@@ -226,6 +228,9 @@ func _launch(source: AnimatedSprite2D, hit_dir: Vector2) -> void:
 	material = source.material
 	texture_filter = source.texture_filter
 	_bursts.append(self)
+	for r in exclude_rids:
+		if r is RID:
+			_exclude.append(r)
 
 	if not source.sprite_frames:
 		queue_free()
@@ -316,8 +321,24 @@ func _spawn_blood(pos: Vector2, vel: Vector2) -> void:
 
 func _ray(space: PhysicsDirectSpaceState2D, from: Vector2, to: Vector2) -> Dictionary:
 	var q := PhysicsRayQueryParameters2D.create(from, to, world_mask)
+	# Тело, внутри которого начался луч (например, пол под ногами врага), считается ударом с нулевой нормалью:
+	# такой кусок потом выталкивается наружу (см. _push_out), а не проваливается сквозь пол
 	q.hit_from_inside = true
+	q.exclude = _exclude
 	return space.intersect_ray(q)
+
+## Кусок оказался внутри твёрдого тела: выталкиваем его вверх на поверхность. false — не удалось (вид сверху, глубоко в стене)
+func _push_out(space: PhysicsDirectSpaceState2D, p: Piece) -> bool:
+	var q := PhysicsPointQueryParameters2D.new()
+	q.collision_mask = world_mask
+	q.exclude = _exclude
+	q.collide_with_bodies = true
+	for i in 32:
+		q.position = p.pos
+		if space.intersect_point(q, 1).is_empty():
+			return true
+		p.pos.y -= 2.0
+	return false
 
 ## Первое приземление куска: залп крови
 func _land(p: Piece, n: Vector2) -> void:
@@ -364,8 +385,17 @@ func _physics_process(delta: float) -> void:
 				var n: Vector2 = hit["normal"]
 				p.pos = hit["position"] + n
 				if n == Vector2.ZERO:
-					_land(p, n)
-					_settle(p)
+					# Кусок начался внутри тела (ноги врага в полу): выталкиваем наружу и отскакиваем
+					if _push_out(space, p):
+						p.vel.y = -absf(p.vel.y) * bounce
+						p.vel.x *= (1.0 - surface_friction)
+						if not p.landed:
+							_land(p, Vector2.UP)
+						if p.vel.length() < rest_speed:
+							_settle(p)
+					else:
+						_land(p, n)
+						_settle(p)
 				else:
 					var impact := absf(p.vel.dot(n))
 					var vn := n * p.vel.dot(n)
